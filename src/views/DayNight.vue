@@ -159,13 +159,13 @@ const cloud = ref(null);
 
 onMounted(() => {
   setStyle([moon, stars], { opacity: 0 });
-  setStyle([sun, cloud, moon], { transform: 'translateX(15px)' });
-  setStyle([stars], { transform: 'translate(35px,-5px)' });
+  setStyle([sun, cloud, moon], { x: 15 });
+  setStyle([stars], { x: 35, y: -5 });
   // gsap.set("#sun, #cloud, #moon", { x: 15 });
   // gsap.set(".star", { x: 35, y: -5 });
   day.value.addEventListener('click', function () {
-    // gsap.to("#sun", 1, { x: -157, opacity: 0, ease: Power1.easeInOut });
-    transTo(sun, 1, { transform: 'translateX(-157px)' });
+    // transTo(sun, { x: -157, duration: 1 });
+    transTo(cloud, { opicty: 0, duration: 0.5 });
     // gsap.to("#cloud", .5, { opacity: 0, ease: Power1.easeInOut });
     // gsap.to("#moon", 1, { x: -157, rotate: -360, transformOrigin: "center", opacity: 1, ease: Power1.easeInOut });
     // gsap.to(".star", .5, { opacity: 1, ease: Power1.easeInOut });
@@ -188,6 +188,8 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  animation: name duration timing-function delay iteration-count direction fill-mode;
+  transform: matrix();
 }
 
 svg {

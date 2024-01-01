@@ -1,28 +1,63 @@
-const handleMabyRefs = (refs, callBack, ...args) => {
-  refs.forEach(ele => {
-    const maybeRef = ele.value;
-    if (Array.isArray(maybeRef)) {
-      maybeRef.forEach(ref => {
-        callBack(ref, ...args);
-      });
-    } else {
-      callBack(maybeRef, ...args);
-    }
-  });
+const handleMabyRefs = (maybeyRefs, callBack, ...args) => {
+  if (Array.isArray(maybeyRefs)) {
+    const refs = maybeyRefs;
+    refs.forEach(ele => {
+      const maybeEles = ele.value;
+      if (Array.isArray(maybeEles)) {
+        maybeEles.forEach(ele => {
+          callBack(ele, ...args);
+        });
+      } else {
+        const ele = maybeEles;
+        callBack(ele, ...args);
+      }
+    });
+  } else {
+    const ele = maybeyRefs.value;
+    callBack(ele, ...args);
+  }
 };
 
-export const setStyle = (refs, styles) => {
-  const _setStyle = (ref) => {
+export const setStyle = (maybeyRefs, styles) => {
+  const _setStyle = (ele) => {
     Object.keys(styles).forEach(key => {
-      ref.style[key] = styles[key];
+      const styleValue = styles[key];
+      if (key === 'x' || key === 'y') {
+        ele.style.transform = `matrix(1,0,0,1,${key === 'x' ? `${styleValue},0` : `0,${styleValue}`})`;
+        return;
+      }
+      ele.style[key] = styleValue;
     });
   };
-  handleMabyRefs(refs, _setStyle);
+  handleMabyRefs(maybeyRefs, _setStyle);
 };
 
-export const transTo = (refs, duration, targetStyles) => {
-  const runAni = () => {
+const getMatrix = (ele, x, y) => {
+  if (x || y) {
+    const matrixVal = ele.style.transform.match(/\(([^)]+)\)/)[1].split(',');
+    const preX = matrixVal[4];
+    const preY = matrixVal[5];
+    x = x ? x : preX;
+    y = y ? y : preY;
+    return `matrix(1,0,0,1,${x},${y})`;
+  }
+  return '';
+};
 
+export const transTo = (maybeyRefs, aniOptions) => {
+  let { x, y, opicty, duration, dely, easing } = aniOptions;
+  const options = {
+    duration: duration * 1000,
+    dely: dely,
+    fill: 'forwards',
+    easing: easing
   };
-  handleMabyRefs(refs, runAni);
+  const runAni = (ele) => {
+    const keyframes = {
+      transform: getMatrix(ele, x, y),
+      opicty
+    };
+    ele.animate(keyframes, options);
+  };
+  handleMabyRefs(maybeyRefs, runAni);
 };
