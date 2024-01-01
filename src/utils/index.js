@@ -32,11 +32,18 @@ export const setStyle = (maybeyRefs, styles) => {
   handleMabyRefs(maybeyRefs, _setStyle);
 };
 
-const getMatrix = (ele, x, y) => {
+const getMatrix = (transform, x, y) => {
   if (x || y) {
-    const matrixVal = ele.style.transform.match(/\(([^)]+)\)/)[1].split(',');
-    const preX = matrixVal[4];
-    const preY = matrixVal[5];
+    let preX;
+    let preY;
+    if (transform) {
+      const matrixVal = transform?.match(/\(([^)]+)\)/)[1].split(',');
+      preX = matrixVal[4];
+      preY = matrixVal[5];
+    } else {
+      preX = 0;
+      preY = 0;
+    }
     x = x ? x : preX;
     y = y ? y : preY;
     return `matrix(1,0,0,1,${x},${y})`;
@@ -44,8 +51,8 @@ const getMatrix = (ele, x, y) => {
   return '';
 };
 
-export const transTo = (maybeyRefs, aniOptions) => {
-  let { x, y, opicty, duration, dely, easing } = aniOptions;
+export const transTo = (maybeyRefs, duration, aniOptions) => {
+  let { x, y, opacity = '', rotate = '', transformOrigin, dely = 0, easing } = aniOptions;
   const options = {
     duration: duration * 1000,
     dely: dely,
@@ -53,10 +60,21 @@ export const transTo = (maybeyRefs, aniOptions) => {
     easing: easing
   };
   const runAni = (ele) => {
-    const keyframes = {
-      transform: getMatrix(ele, x, y),
-      opicty
-    };
+    // ele.style.transformOrigin = '250px center';
+    const style = ele.style;
+    const transform = style.transform;
+    const keyframes = [
+      {
+        transform: style.transform,
+        opacity: style.opacity,
+        rotate: style.rotate
+      },
+      {
+        transform: getMatrix(transform, x, y) + ' ' + `rotate(${rotate}deg)`,
+        opacity,
+      }
+    ];
+
     ele.animate(keyframes, options);
   };
   handleMabyRefs(maybeyRefs, runAni);
